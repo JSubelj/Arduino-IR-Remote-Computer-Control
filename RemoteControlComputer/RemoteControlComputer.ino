@@ -11,6 +11,7 @@ IRrecv receiver(IR_RECEIVER);
 decode_results results;
 
 int incomingCommand = 0;
+char incomingChar = 0;
 unsigned long relay_millis_received = 0;
 unsigned int relay_time_delay = 500;
 
