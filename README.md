@@ -1,0 +1,1 @@
+pyinstaller.exe --noconsole --onefile -n arduino_ir_driver main.py

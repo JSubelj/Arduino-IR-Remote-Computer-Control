@@ -5,7 +5,7 @@
 
 #define OPCODE_RELAY '0'
 #define RELAY_TIME_DELAY 500
-#define RESERVED_COMMAND 0x95
+#define RESERVED_COMMAND 0xDC
 
 IRrecv receiver(IR_RECEIVER); 
 decode_results results;
@@ -37,7 +37,7 @@ void loop()
   // Get 
   if(receiver.decode()) 
   {
-    incomingCommand = receiver.decodedIRData.decodedRawData;
+    incomingCommand = receiver.decodedIRData.command;
     if(incomingCommand==RESERVED_COMMAND){
         relay_millis_received = millis();
     }else{

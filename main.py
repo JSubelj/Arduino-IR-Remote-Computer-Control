@@ -28,8 +28,13 @@ class Commands:
     VOL_DOWN="VOL_DOWN"
     MUTE="MUTE"
     ALT_TAB="ALT_TAB"
+    EXIT = "EXIT"
+    PLAY_PAUSE = "PLAY_PAUSE"
+    STOP = "STOP"
+    NEXT_TRACK = "NEXT_TRACK"
+    PREV_TRACK = "PREV_TRACK"
 
-KNOWN_COMMANDS = [Commands.POWER,Commands.UP,Commands.DOWN,Commands.LEFT,Commands.RIGHT,Commands.ENTER,Commands.TAB,Commands.BACK,Commands.MENU,Commands.VOL_UP,Commands.VOL_DOWN,Commands.MUTE,Commands.ALT_TAB]
+KNOWN_COMMANDS = [Commands.POWER,Commands.UP,Commands.DOWN,Commands.LEFT,Commands.RIGHT,Commands.ENTER,Commands.TAB,Commands.BACK,Commands.MENU,Commands.VOL_UP,Commands.VOL_DOWN,Commands.MUTE,Commands.ALT_TAB,Commands.EXIT,Commands.PLAY_PAUSE,Commands.STOP,Commands.NEXT_TRACK,Commands.PREV_TRACK]
 
 def get_config():
     config = configparser.ConfigParser()
@@ -56,6 +61,11 @@ def get_config():
         int(config.get(command_set,"VOL_DOWN"),16): "VOL_DOWN",
         int(config.get(command_set,"MUTE"),16): "MUTE",
         int(config.get(command_set,"ALT_TAB"),16): "ALT_TAB",
+        int(config.get(command_set,"EXIT"),16): "EXIT",
+        int(config.get(command_set,"PLAY_PAUSE"),16): "PLAY_PAUSE",
+        int(config.get(command_set,"STOP"),16): "STOP",
+        int(config.get(command_set,"NEXT_TRACK"),16): "NEXT_TRACK",
+        int(config.get(command_set,"PREV_TRACK"),16): "PREV_TRACK",
     }
     return (port,
             COMMANDS,
@@ -94,11 +104,7 @@ def execute_command(command_hex):
             keyboard_sim.TypeKey(keyboard_sim.VK_TAB)
             return
         case Commands.BACK:
-            keyboard_sim.TypeKey(keyboard_sim.VK_ESCAPE)
-            if alt_pressed:
-                keyboard_sim.ReleaseKey(keyboard_sim.VK_ALT)
-                alt_pressed = False
-            return
+            keyboard_sim.TypeKey(keyboard_sim.VK_BACKSPACE)
         case Commands.MENU:
             keyboard_sim.TypeKey(keyboard_sim.VK_WIN)
             return
@@ -115,6 +121,24 @@ def execute_command(command_hex):
             keyboard_sim.PressKey(keyboard_sim.VK_ALT)
             keyboard_sim.PressKey(keyboard_sim.VK_TAB)
             alt_pressed = True
+            return
+        case Commands.EXIT:
+            keyboard_sim.TypeKey(keyboard_sim.VK_ESCAPE)
+            if alt_pressed:
+                keyboard_sim.ReleaseKey(keyboard_sim.VK_ALT)
+                alt_pressed = False
+            return
+        case Commands.PLAY_PAUSE:
+            keyboard_sim.TypeKey(keyboard_sim.VK_PLAY_PAUSE)
+            return
+        case Commands.STOP:
+            keyboard_sim.TypeKey(keyboard_sim.VK_STOP)
+            return
+        case Commands.NEXT_TRACK:
+            keyboard_sim.TypeKey(keyboard_sim.VK_NEXT_TRACK)
+            return
+        case Commands.PREV_TRACK:
+            keyboard_sim.TypeKey(keyboard_sim.VK_PREV_TRACK)
             return
         case None:
             print("Hex",hex(command_hex),"not implemented.")
