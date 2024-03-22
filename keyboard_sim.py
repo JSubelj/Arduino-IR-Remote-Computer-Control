@@ -40,6 +40,7 @@ VK_PLAY_PAUSE = 0xB3
 VK_STOP = 0xB2
 VK_PREV_TRACK = 0xB1
 VK_NEXT_TRACK = 0xB0
+VK_F4 = 0x73
 # C struct definitions
 
 wintypes.ULONG_PTR = wintypes.WPARAM

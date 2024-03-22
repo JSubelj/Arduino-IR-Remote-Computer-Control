@@ -4,15 +4,29 @@ import dataclasses
 import configparser
 import time
 import keyboard_sim
+import pygetwindow
+import subprocess
 
 ARDUINO_PORT_ID='CH340'
-SERIAL_BAUD=250000
+SERIAL_BAUD=9600
 PORT = None
 COMMANDS = {}
 RELAY_TIME = 300
-SECONDS_BETWEEN_INPUTS = 0.200
+SECONDS_BETWEEN_INPUTS = 0.100
 alt_pressed = False
 DEBUG = False
+
+@dataclasses.dataclass
+class Apps:
+    plex_name = "Plex HTPC"
+    plex_path = r"C:\Program Files\Plex\Plex HTPC\Plex HTPC.exe"
+    yttv_name = "YouTube on TV - Google Chrome"
+    yttv_path = r"C:\Users\Cleptes\Desktop\yttv.bat"
+    kodi_name = "Kodi"
+    kodi_path = r"C:\Program Files\Kodi\kodi.exe"
+    firefox_name = "Mozilla Firefox"
+    firefox_path = r"C:\Program Files\Mozilla Firefox\firefox.exe"
+
 @dataclasses.dataclass
 class Commands:
     POWER="POWER"
@@ -33,8 +47,15 @@ class Commands:
     STOP = "STOP"
     NEXT_TRACK = "NEXT_TRACK"
     PREV_TRACK = "PREV_TRACK"
+    RED_APP_KEY = "RED_APP_KEY"
+    GREEN_APP_KEY = "GREEN_APP_KEY"
+    YELLOW_APP_KEY = "YELLOW_APP_KEY"
+    BLUE_APP_KEY = "BLUE_APP_KEY"
+    ALT_F4 = "ALT_F4"
 
-KNOWN_COMMANDS = [Commands.POWER,Commands.UP,Commands.DOWN,Commands.LEFT,Commands.RIGHT,Commands.ENTER,Commands.TAB,Commands.BACK,Commands.MENU,Commands.VOL_UP,Commands.VOL_DOWN,Commands.MUTE,Commands.ALT_TAB,Commands.EXIT,Commands.PLAY_PAUSE,Commands.STOP,Commands.NEXT_TRACK,Commands.PREV_TRACK]
+KNOWN_COMMANDS = [Commands.POWER,Commands.UP,Commands.DOWN,Commands.LEFT,Commands.RIGHT,Commands.ENTER,Commands.TAB,Commands.BACK,Commands.MENU,Commands.VOL_UP,Commands.VOL_DOWN,Commands.MUTE,Commands.ALT_TAB,Commands.EXIT,Commands.PLAY_PAUSE,Commands.STOP,Commands.NEXT_TRACK,Commands.PREV_TRACK,Commands.RED_APP_KEY,Commands.GREEN_APP_KEY,Commands.YELLOW_APP_KEY,Commands.BLUE_APP_KEY,Commands.ALT_F4]
+
+
 
 def get_config():
     config = configparser.ConfigParser()
@@ -66,12 +87,34 @@ def get_config():
         int(config.get(command_set,"STOP"),16): "STOP",
         int(config.get(command_set,"NEXT_TRACK"),16): "NEXT_TRACK",
         int(config.get(command_set,"PREV_TRACK"),16): "PREV_TRACK",
+        int(config.get(command_set,"RED_APP_KEY"),16): "RED_APP_KEY",
+        int(config.get(command_set,"GREEN_APP_KEY"),16): "GREEN_APP_KEY",
+        int(config.get(command_set,"YELLOW_APP_KEY"),16): "YELLOW_APP_KEY",
+        int(config.get(command_set,"BLUE_APP_KEY"),16): "BLUE_APP_KEY",
+        int(config.get(command_set,"ALT_F4"),16): "ALT_F4",
+        
     }
     return (port,
             COMMANDS,
             int(relay_time) if relay_time else RELAY_TIME,
             float(seconds_between_inputs) if seconds_between_inputs else SECONDS_BETWEEN_INPUTS,
             debug)
+
+# Plex HTPC
+# YouTube on TV - Google Chrome
+# Mozilla Firefox
+# Kodi
+def put_app_in_foreground_or_start_it(window_name, path):
+    started_apps = pygetwindow.getWindowsWithTitle(window_name) 
+    if len(started_apps) == 0:
+        print(f"starting {window_name} at: {path}")
+        subprocess.Popen([path])
+    else:
+        app=started_apps[0]
+        print(f"opening app {window_name} {app}")
+        app.minimize()
+        app.restore()
+
 
 def execute_command(command_hex):
     global ser
@@ -140,6 +183,25 @@ def execute_command(command_hex):
         case Commands.PREV_TRACK:
             keyboard_sim.TypeKey(keyboard_sim.VK_PREV_TRACK)
             return
+        case Commands.RED_APP_KEY:
+            put_app_in_foreground_or_start_it(Apps.yttv_name,Apps.yttv_path)
+            return
+        case Commands.GREEN_APP_KEY:
+            put_app_in_foreground_or_start_it(Apps.plex_name,Apps.plex_path)
+            return
+        case Commands.YELLOW_APP_KEY:
+            put_app_in_foreground_or_start_it(Apps.firefox_name, Apps.firefox_path)
+            return
+        case Commands.BLUE_APP_KEY:
+            put_app_in_foreground_or_start_it(Apps.kodi_name,Apps.kodi_path)
+            return
+        case Commands.ALT_F4:
+            keyboard_sim.PressKey(keyboard_sim.VK_ALT)
+            keyboard_sim.PressKey(keyboard_sim.VK_F4)
+            keyboard_sim.ReleaseKey(keyboard_sim.VK_F4)
+            keyboard_sim.ReleaseKey(keyboard_sim.VK_ALT)
+            return
+        
         case None:
             print("Hex",hex(command_hex),"not implemented.")
 

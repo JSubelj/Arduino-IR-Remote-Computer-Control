@@ -27,7 +27,7 @@ void setup()
   pinMode(RELAY_PIN, OUTPUT);
   digitalWrite(RELAY_PIN, 1);
 
-  Serial.begin(250000);
+  Serial.begin(9600);
 
   receiver.enableIRIn(); // start receiving signals
 }
